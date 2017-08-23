@@ -11,7 +11,5 @@
 sbt clean assembly
 java -jar target/scala-2.12/funfunnet-crawler-assembly.jar
 ```
-- url 확인 : localhost:9000
-
 ## Contribution Guide
 [How to Contribute 링크](https://github.com/funfunStudy/funfunnet/wiki/How-to-Contribute)
