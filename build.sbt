@@ -1,29 +1,32 @@
-name := """funfunnet-crawler"""
-organization := "com.example"
+name := "funfunnet-crawler"
 
-version := "0.1.0-SNAPSHOT"
+version := "1.0"
+scalaVersion := Versions.scala
+organization := "net.funfunnet.crawler"
+javacOptions := Seq("-source", "1.8", "-target", "1.8")
+scalacOptions := Seq("-target:jvm-1.8")
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+// scala-config
+Seq(unmanagedResourceDirectories in Compile += baseDirectory.value / "conf")
 
-scalaVersion := "2.11.11"
-
-libraryDependencies += filters
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test
-
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-actor" % Versions.akka,
+  "com.typesafe.akka" %% "akka-testkit" % Versions.akka,
+  "com.enragedginger" %% "akka-quartz-scheduler" % "1.6.1-akka-2.5.x",
+  "com.typesafe" % "config" % "1.2.1",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+)
 
 // scalastyle configurations
 // test task 수행시, scalastyle에 실패하면 에러를 발생시킴
-scalastyleConfig := file("conf/scalastyle-config.xml")
 scalastyleFailOnError := true
 
-lazy val testScalastyle = taskKey[Unit]("testScalastyle")
-testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value
-(test in Test) <<= (test in Test) dependsOn testScalastyle
+// check scalastyle in compile time
+lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value
+(compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value
 
-
-// Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.example.controllers._"
-
-// Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.example.binders._"
-
+// assembly
+assemblyJarName in assembly := s"${name.value}-assembly.jar"
+mainClass in assembly := Some("net.funfunnet.crawler.Application")
+test in assembly := {}
