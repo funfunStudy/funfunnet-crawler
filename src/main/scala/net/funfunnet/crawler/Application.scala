@@ -2,22 +2,13 @@ package net.funfunnet.crawler
 
 import akka.actor.{ActorSystem, Props}
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import scala.concurrent.duration._
+import net.funfunnet.crawler.actor.{Start, Supervisor}
 
 object Application extends App {
 
   val system = ActorSystem("funfunnet-crawler")
-
-  import system.dispatcher
-
-  val crawlingBySchedulerActor = system.actorOf(Props[CrawlingActor], name = "crawlingBySchedulerActor")
-  val crawlingByQuartzActor = system.actorOf(Props[CrawlingActor], name = "crawlingByQuartzActor")
-
-
-  //call by scheduler
-  val cancellable =
-    system.scheduler.schedule(5 seconds, 10 seconds, crawlingBySchedulerActor, "scheduler")
+  val supervisor = system.actorOf(Props[Supervisor], name = "supervisor")
 
   //call by quartz
-  QuartzSchedulerExtension(system).schedule("Every30Seconds", crawlingByQuartzActor, "quartz")
+  QuartzSchedulerExtension(system).schedule("Crawling", supervisor, Start)
 }
